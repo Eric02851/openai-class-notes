@@ -115,22 +115,25 @@ def transcribeStatus():
 @app.route('/downloadFiles', methods=['GET'])
 def downloadFiles():
     if len(os.listdir(tmpDir)) <= 1:
-        return "No files available for download", 200
+        return "No files available for download", 404
 
     fileType = request.get_json()["fileType"]
-    with open(f".{filePath.split('.')[1]}.{fileType}", 'r') as f:
-        return f.read()
+    transcriptPath = f".{filePath.split('.')[1]}.{fileType}"
+    response = {"fileName": transcriptPath.split('/')[-1]}
+
+    response["file"] = open(transcriptPath, 'r').read()
+    return response, 200
 
 @app.route('/deleteFiles', methods=['GET'])
 def deleteFiles():
     tmpFiles = os.listdir(tmpDir)
     if len(tmpFiles) <= 1:
-        return "No files available for deletion", 200
+        return "No files available for deletion", 404
 
     for fileName in tmpFiles:
         os.remove(tmpDir + fileName)
 
-    return f"\"{tmpFiles[0].split('.')[0]}\" files deleted"
+    return f"\"{tmpFiles[0].split('.')[0]}\" files deleted", 200
 
 @app.route('/checkTokens', methods=['POST'])
 def checkTokens():
